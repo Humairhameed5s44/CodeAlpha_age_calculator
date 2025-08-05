@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Age Calculator</h1>
+        <form id="ageForm">
+            <div class="form-group">
+                <label for="birthDate">Enter your date of birth:</label>
+                <input type="date" id="birthDate" required>
+                <div class="error" id="errorMessage"></div>
+            </div>
+            <button type="submit" class="btn">Calculate Age</button>
+        </form>
+        
+        <div class="result" id="result">
+            <h2>Your Age</h2>
+            <div class="age-display">
+                <div class="age-item">
+                    <span class="age-number" id="years">0</span>
+                    <span class="age-label">Years</span>
+                </div>
+                <div class="age-item">
+                    <span class="age-number" id="months">0</span>
+                    <span class="age-label">Months</span>
+                </div>
+                <div class="age-item">
+                    <span class="age-number" id="days">0</span>
+                    <span class="age-label">Days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('ageForm');
+        const birthDateInput = document.getElementById('birthDate');
+        const resultDiv = document.getElementById('result');
+        const errorMessage = document.getElementById('errorMessage');
+        const yearsSpan = document.getElementById('years');
+        const monthsSpan = document.getElementById('months');
+        const daysSpan = document.getElementById('days');
+
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            
+            let years = today.getFullYear() - birth.getFullYear();
+            let months = today.getMonth() - birth.getMonth();
+            let days = today.getDate() - birth.getDate();
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            return { years, months, days };
+        }
+
+        function validateDate(dateString) {
+            const inputDate = new Date(dateString);
+            const today = new Date();
+            
+            if (inputDate > today) {
+                return 'Date of birth cannot be in the future';
+            }
+            
+            const hundredYearsAgo = new Date();
+            hundredYearsAgo.setFullYear(today.getFullYear() - 150);
+            
+            if (inputDate < hundredYearsAgo) {
+                return 'Please enter a valid date of birth';
+            }
+            
+            return null;
+        }
+
+        function displayResult(age) {
+            yearsSpan.textContent = age.years;
+            monthsSpan.textContent = age.months;
+            daysSpan.textContent = age.days;
+            
+            resultDiv.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            resultDiv.style.display = 'none';
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const birthDate = birthDateInput.value;
+            
+            if (!birthDate) {
+                showError('Please enter your date of birth');
+                return;
+            }
+            
+            const validationError = validateDate(birthDate);
+            if (validationError) {
+                showError(validationError);
+                return;
+            }
+            
+            const age = calculateAge(birthDate);
+            displayResult(age);
+        });
+
+        birthDateInput.addEventListener('input', function() {
+            if (errorMessage.style.display === 'block') {
+                errorMessage.style.display = 'none';
+            }
+        });
+
+        const today = new Date();
+        const maxDate = today.toISOString().split('T')[0];
+        birthDateInput.setAttribute('max', maxDate);
+    </script>
+</body>
+</html>
